@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f4; font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; }
+    .wrapper { max-width: 600px; margin: 32px auto; background: #ffffff; border: 1px solid #e0e0e0; }
+    .header { padding: 32px 40px 24px; border-bottom: 3px solid; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+    .header p { margin: 0; font-size: 13px; color: #666; }
+    .body { padding: 32px 40px; }
+    .body p { font-size: 15px; line-height: 1.6; margin: 0 0 16px; }
+    .summary-box { background: #f8f6f1; border-left: 4px solid; padding: 20px 24px; margin: 24px 0; border-radius: 0 4px 4px 0; }
+    .summary-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; margin-bottom: 4px; }
+    .summary-box .value { font-size: 28px; font-weight: 700; margin: 0; }
+    .summary-box .due { font-size: 13px; color: #444; margin-top: 8px; }
+    .btn { display: inline-block; padding: 14px 32px; font-size: 15px; font-weight: 600;
+           color: #ffffff !important; text-decoration: none; border-radius: 2px; margin: 8px 0; }
+    .footer { padding: 20px 40px; background: #f8f6f1; border-top: 1px solid #e0e0e0; }
+    .footer p { font-size: 12px; color: #888; margin: 0; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header" th:style="'border-color:' + ${primaryColor}">
+      <h1 th:style="'color:' + ${primaryColor}" th:text="${businessName}">Business Name</h1>
+      <p>Invoice Notification</p>
+    </div>
+
+    <div class="body">
+      <p>Hi <strong th:text="${clientName}">Client</strong>,</p>
+      <p>Please find your invoice attached to this email. You can also view it online using the button below.</p>
+
+      <div class="summary-box" th:style="'border-color:' + ${primaryColor}">
+        <div class="label">Invoice <span th:text="${invoiceNumber}"></span></div>
+        <p class="value" th:text="${total}">R 0.00</p>
+        <div class="due">Due by <strong th:text="${dueDate}">01 January 2026</strong></div>
+      </div>
+
+      <a th:href="${viewUrl}" th:style="'background:' + ${primaryColor}" class="btn">
+        View Invoice Online
+      </a>
+
+      <p style="margin-top: 24px; font-size: 13px; color: #666;">
+        The PDF invoice is attached to this email for your records.
+        If you have any questions, please reply to this email.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>This invoice was sent via <strong>InvoiceFlow</strong> on behalf of <span th:text="${businessName}"></span>.</p>
+      <p>invoiceflow.co.za</p>
+    </div>
+  </div>
+</body>
+</html>

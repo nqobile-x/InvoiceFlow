@@ -1,0 +1,99 @@
+version: "3.9"
+
+# InvoiceFlow - Local Development Stack
+# Run: docker-compose up -d
+# Stop: docker-compose down
+# Reset DB: docker-compose down -v
+
+services:
+
+  # ── PostgreSQL Database ────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: invoiceflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: invoiceflow
+      POSTGRES_USER: invoiceflow
+      POSTGRES_PASSWORD: invoiceflow_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U invoiceflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot API ────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: invoiceflow-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/invoiceflow
+      DB_USERNAME: invoiceflow
+      DB_PASSWORD: invoiceflow_dev_password
+      JWT_SECRET: ZGV2ZWxvcG1lbnRfc2VjcmV0X2tleV9mb3JfbG9jYWxfb25seV9kb19ub3RfdXNlX2luX3Byb2Q=
+      JWT_ACCESS_EXPIRY_MS: 900000
+      JWT_REFRESH_EXPIRY_MS: 604800000
+      ALLOWED_ORIGINS: http://localhost:3000
+      APP_URL: http://localhost:3000
+      API_URL: http://localhost:8080
+      PAYFAST_SANDBOX: "true"
+      UPLOAD_DIR: /app/uploads
+      # Add your own values for email and PayFast in .env file
+      MAIL_HOST: ${MAIL_HOST:-smtp.sendgrid.net}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-apikey}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@invoiceflow.local}
+      PAYFAST_MERCHANT_ID: ${PAYFAST_MERCHANT_ID:-}
+      PAYFAST_MERCHANT_KEY: ${PAYFAST_MERCHANT_KEY:-}
+      PAYFAST_PASSPHRASE: ${PAYFAST_PASSPHRASE:-}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Next.js Frontend ───────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: invoiceflow-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      - api
+
+  # ── pgAdmin (optional DB UI) ───────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: invoiceflow-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@invoiceflow.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    profiles:
+      - tools  # Only starts with: docker-compose --profile tools up
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
