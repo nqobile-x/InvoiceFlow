@@ -1,31 +1,12 @@
-# ---- Build stage ----
-FROM eclipse-temurin:21-jdk-alpine AS builder
-WORKDIR /build
-
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
 COPY pom.xml .
+RUN mvn dependency:go-offline -q
 COPY src ./src
-
-RUN apk add --no-cache maven
 RUN mvn clean package -DskipTests -q
 
-# ---- Runtime stage ----
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-
-# Non-root user for security
-RUN addgroup -S invoiceflow && adduser -S invoiceflow -G invoiceflow
-
-COPY --from=builder /build/target/*.jar app.jar
-
-# Create uploads directory
-RUN mkdir -p /app/uploads && chown -R invoiceflow:invoiceflow /app
-
-USER invoiceflow
-
+COPY --from=build /app/target/invoiceflow-api-*.jar app.jar
 EXPOSE 8080
-
-ENTRYPOINT ["java", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-  "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
