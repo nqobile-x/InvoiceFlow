@@ -1,14 +1,23 @@
-name: Keep Render Awake
+name: Keep Services Awake
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
-  ping:
+  ping-render:
     runs-on: ubuntu-latest
     steps:
       - name: Ping InvoiceFlow API
         run: |
           curl -sf https://invoiceflow-api-dwy4.onrender.com/actuator/health || true
+
+  ping-neon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Neon DB
+        env:
+          NEON_DB_URL: ${{ secrets.NEON_DB_URL }}
+        run: |
+          psql "$NEON_DB_URL" -c "SELECT 1" || true
