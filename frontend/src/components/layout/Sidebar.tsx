@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -72,7 +73,8 @@ export function Sidebar() {
       style={{ background: "var(--bg-sidebar)" }}
     >
       {/* Logo */}
-      <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+      <div className="px-5 py-4 border-b flex items-center gap-3" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <Image src="/logo.png" alt="InvoiceFlow" width={32} height={32} style={{ borderRadius: 6 }} />
         <span
           className="text-lg font-bold tracking-tight"
           style={{ fontFamily: "'Playfair Display', serif", color: "#C9A84C" }}
