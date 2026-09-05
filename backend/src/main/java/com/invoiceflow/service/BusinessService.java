@@ -104,6 +104,10 @@ public class BusinessService {
         Business business = businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> InvoiceFlowException.notFound("Business profile not found"));
         business.setLogoUrl(logoUrl);
+        // If it's a data URI, persist it as base64 too so PDF generation works across restarts
+        if (logoUrl != null && logoUrl.startsWith("data:")) {
+            business.setLogoBase64(logoUrl);
+        }
         return BusinessResponse.from(businessRepository.save(business));
     }
 }

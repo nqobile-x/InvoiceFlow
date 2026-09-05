@@ -66,16 +66,23 @@ public class BusinessController {
             return ResponseEntity.badRequest().build();
         }
 
-        String ext = contentType.contains("png") ? ".png" : ".jpg";
-        String filename = UUID.randomUUID() + ext;
+        byte[] bytes = file.getBytes();
 
-        Path dir = Paths.get(uploadDir, "logos");
-        Files.createDirectories(dir);
-        Files.write(dir.resolve(filename), file.getBytes());
+        // Store base64 in DB so logo survives server restarts
+        String base64 = java.util.Base64.getEncoder().encodeToString(bytes);
+        String dataUri = "data:" + contentType + ";base64," + base64;
 
-        String logoUrl = apiUrl + "/uploads/logos/" + filename;
-        businessService.updateLogo(user.getId(), logoUrl);
+        // Also write to disk as fallback (best-effort)
+        try {
+            String ext = contentType.contains("png") ? ".png" : ".jpg";
+            String filename = UUID.randomUUID() + ext;
+            Path dir = Paths.get(uploadDir, "logos");
+            Files.createDirectories(dir);
+            Files.write(dir.resolve(filename), bytes);
+        } catch (Exception ignored) {}
 
-        return ResponseEntity.ok(Map.of("logoUrl", logoUrl));
+        businessService.updateLogo(user.getId(), dataUri);
+
+        return ResponseEntity.ok(Map.of("logoUrl", dataUri));
     }
 }

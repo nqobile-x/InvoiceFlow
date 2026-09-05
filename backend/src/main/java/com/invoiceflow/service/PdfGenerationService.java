@@ -149,20 +149,31 @@ public class PdfGenerationService {
         // Left: Logo + business name
         Cell leftCell = new Cell().setBorder(null).setPadding(0);
 
-        // Embed logo if available
-        if (business.getLogoUrl() != null && !business.getLogoUrl().isBlank()) {
+        // Embed logo — prefer base64 (persists across server restarts), fall back to disk
+        String logoData = business.getLogoBase64() != null ? business.getLogoBase64()
+                : (business.getLogoUrl() != null && business.getLogoUrl().startsWith("data:") ? business.getLogoUrl() : null);
+        if (logoData != null) {
             try {
-                int idx = business.getLogoUrl().indexOf("/uploads/");
-                if (idx >= 0) {
-                    String relative = business.getLogoUrl().substring(idx + 9);
-                    Path logoFile = Paths.get(uploadDir).resolve(relative);
-                    if (Files.exists(logoFile)) {
-                        ImageData imageData = ImageDataFactory.create(Files.readAllBytes(logoFile));
-                        leftCell.add(new Image(imageData).setMaxWidth(160).setMaxHeight(80).setMarginBottom(8));
-                    }
-                }
+                // Strip the data URI prefix to get raw base64 bytes
+                String base64 = logoData.substring(logoData.indexOf(",") + 1);
+                byte[] logoBytes = java.util.Base64.getDecoder().decode(base64);
+                ImageData imageData = ImageDataFactory.create(logoBytes);
+                leftCell.add(new Image(imageData).setMaxWidth(160).setMaxHeight(80).setMarginBottom(8));
             } catch (Exception e) {
-                log.warn("Could not load business logo: {}", e.getMessage());
+                log.warn("Could not load business logo from base64: {}", e.getMessage());
+                // Try disk as last resort
+                try {
+                    if (business.getLogoUrl() != null) {
+                        int idx = business.getLogoUrl().indexOf("/uploads/");
+                        if (idx >= 0) {
+                            Path logoFile = Paths.get(uploadDir).resolve(business.getLogoUrl().substring(idx + 9));
+                            if (Files.exists(logoFile)) {
+                                leftCell.add(new Image(ImageDataFactory.create(Files.readAllBytes(logoFile)))
+                                        .setMaxWidth(160).setMaxHeight(80).setMarginBottom(8));
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
             }
         }
 
