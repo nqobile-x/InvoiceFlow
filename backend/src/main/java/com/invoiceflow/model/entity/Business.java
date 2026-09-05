@@ -59,6 +59,9 @@ public class Business {
     @Column(name = "logo_url")
     private String logoUrl;
 
+    @Column(name = "logo_base64", columnDefinition = "TEXT")
+    private String logoBase64;
+
     @Column(name = "primary_color")
     private String primaryColor;
 
