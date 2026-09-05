@@ -246,6 +246,8 @@ public class InvoiceService {
     private String generateInvoiceNumber(Business business) {
         int year = LocalDate.now().getYear();
         String seq = String.format("%04d", business.getNextInvoiceNumber());
-        return business.getInvoicePrefix() + "-" + year + "-" + seq;
+        String prefix = (business.getInvoicePrefix() != null && !business.getInvoicePrefix().isBlank())
+                ? business.getInvoicePrefix() : "INV";
+        return prefix + "-" + year + "-" + seq;
     }
 }
