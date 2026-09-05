@@ -57,7 +57,24 @@ public class PdfGenerationService {
     private String frontendUrl;
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-    private static final NumberFormat ZAR_FORMAT = NumberFormat.getCurrencyInstance(new Locale("en", "ZA"));
+
+    private static final java.util.Map<String, Locale> CURRENCY_LOCALES = java.util.Map.ofEntries(
+        java.util.Map.entry("ZAR", new Locale("en", "ZA")),
+        java.util.Map.entry("BWP", new Locale("en", "BW")),
+        java.util.Map.entry("NAD", new Locale("en", "NA")),
+        java.util.Map.entry("ZMW", new Locale("en", "ZM")),
+        java.util.Map.entry("KES", new Locale("en", "KE")),
+        java.util.Map.entry("UGX", new Locale("en", "UG")),
+        java.util.Map.entry("NGN", new Locale("en", "NG")),
+        java.util.Map.entry("GHS", new Locale("en", "GH")),
+        java.util.Map.entry("TZS", new Locale("en", "TZ")),
+        java.util.Map.entry("MWK", new Locale("en", "MW")),
+        java.util.Map.entry("USD", Locale.US),
+        java.util.Map.entry("EUR", Locale.GERMANY),
+        java.util.Map.entry("GBP", Locale.UK),
+        java.util.Map.entry("AUD", new Locale("en", "AU")),
+        java.util.Map.entry("CAD", new Locale("en", "CA"))
+    );
 
     /**
      * Generates a PDF for the given invoice and saves it to disk.
@@ -101,10 +118,11 @@ public class PdfGenerationService {
         addBillToSection(document, client, invoice, bold, regular);
 
         // === LINE ITEMS TABLE ===
-        addLineItemsTable(document, invoice, brandColor, bold, regular);
+        String currency = invoice.getCurrency() != null ? invoice.getCurrency() : "ZAR";
+        addLineItemsTable(document, invoice, currency, brandColor, bold, regular);
 
         // === TOTALS ===
-        addTotalsSection(document, invoice, brandColor, bold, regular);
+        addTotalsSection(document, invoice, currency, brandColor, bold, regular);
 
         // === NOTES + TERMS ===
         addNotesAndTerms(document, invoice, bold, regular);
@@ -222,7 +240,13 @@ public class PdfGenerationService {
                     .setFont(regular).setFontSize(9).setFontColor(ColorConstants.GRAY));
         }
 
-        // Invoice dates
+        // Extra invoice fields under Bill To
+        if (invoice.getContactPerson() != null && !invoice.getContactPerson().isBlank()) {
+            billTo.add(new Paragraph("Attn: " + invoice.getContactPerson())
+                    .setFont(regular).setFontSize(9).setFontColor(ColorConstants.GRAY));
+        }
+
+        // Invoice dates + PO / TIN
         Cell dates = new Cell().setBorder(null).setPadding(0)
                 .setTextAlignment(TextAlignment.RIGHT);
         dates.add(new Paragraph("INVOICE DATE").setFont(bold).setFontSize(9)
@@ -233,13 +257,25 @@ public class PdfGenerationService {
                 .setFontColor(ColorConstants.GRAY));
         dates.add(new Paragraph(invoice.getDueDate().format(DATE_FORMAT))
                 .setFont(bold).setFontSize(10));
+        if (invoice.getPurchaseOrderNumber() != null && !invoice.getPurchaseOrderNumber().isBlank()) {
+            dates.add(new Paragraph("PO NUMBER").setFont(bold).setFontSize(9)
+                    .setFontColor(ColorConstants.GRAY).setMarginTop(8));
+            dates.add(new Paragraph(invoice.getPurchaseOrderNumber())
+                    .setFont(regular).setFontSize(10));
+        }
+        if (invoice.getTinNumber() != null && !invoice.getTinNumber().isBlank()) {
+            dates.add(new Paragraph("TIN").setFont(bold).setFontSize(9)
+                    .setFontColor(ColorConstants.GRAY).setMarginTop(4));
+            dates.add(new Paragraph(invoice.getTinNumber())
+                    .setFont(regular).setFontSize(10));
+        }
 
         meta.addCell(billTo);
         meta.addCell(dates);
         doc.add(meta);
     }
 
-    private void addLineItemsTable(Document doc, Invoice invoice,
+    private void addLineItemsTable(Document doc, Invoice invoice, String currency,
                                    DeviceRgb brandColor, PdfFont bold, PdfFont regular) {
         Table table = new Table(UnitValue.createPercentArray(new float[]{45, 10, 15, 10, 20}))
                 .setWidth(UnitValue.createPercentValue(100))
@@ -268,30 +304,30 @@ public class PdfGenerationService {
                     .add(new Paragraph(item.quantity().stripTrailingZeros().toPlainString())
                             .setFont(regular).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)).setPadding(7));
             table.addCell(new Cell().setBackgroundColor(rowBg)
-                    .add(new Paragraph(formatAmount(item.unitPrice()))
+                    .add(new Paragraph(formatAmount(item.unitPrice(), currency))
                             .setFont(regular).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)).setPadding(7));
             table.addCell(new Cell().setBackgroundColor(rowBg)
                     .add(new Paragraph(item.taxRate().compareTo(BigDecimal.ZERO) == 0 ? "0%" : item.taxRate() + "%")
                             .setFont(regular).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)).setPadding(7));
             table.addCell(new Cell().setBackgroundColor(rowBg)
-                    .add(new Paragraph(formatAmount(item.amount()))
+                    .add(new Paragraph(formatAmount(item.amount(), currency))
                             .setFont(bold).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)).setPadding(7));
         }
 
         doc.add(table);
     }
 
-    private void addTotalsSection(Document doc, Invoice invoice,
+    private void addTotalsSection(Document doc, Invoice invoice, String currency,
                                   DeviceRgb brandColor, PdfFont bold, PdfFont regular) {
         Table totals = new Table(UnitValue.createPercentArray(new float[]{70, 30}))
                 .setWidth(UnitValue.createPercentValue(100))
                 .setMarginBottom(20);
 
-        addTotalsRow(totals, "Subtotal", formatAmount(invoice.getSubtotal()), regular, false, null);
+        addTotalsRow(totals, "Subtotal", formatAmount(invoice.getSubtotal(), currency), regular, false, null);
         if (invoice.getTaxTotal().compareTo(BigDecimal.ZERO) > 0) {
-            addTotalsRow(totals, "VAT (15%)", formatAmount(invoice.getTaxTotal()), regular, false, null);
+            addTotalsRow(totals, "VAT (15%)", formatAmount(invoice.getTaxTotal(), currency), regular, false, null);
         }
-        addTotalsRow(totals, "TOTAL DUE", formatAmount(invoice.getTotal()), bold, true, brandColor);
+        addTotalsRow(totals, "TOTAL DUE", formatAmount(invoice.getTotal(), currency), bold, true, brandColor);
 
         doc.add(totals);
     }
@@ -435,7 +471,12 @@ public class PdfGenerationService {
         return new DeviceRgb(r, g, b);
     }
 
-    private String formatAmount(BigDecimal amount) {
-        return ZAR_FORMAT.format(amount != null ? amount : BigDecimal.ZERO);
+    private String formatAmount(BigDecimal amount, String currency) {
+        Locale locale = CURRENCY_LOCALES.getOrDefault(currency != null ? currency : "ZAR", new Locale("en", "ZA"));
+        NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
+        try {
+            fmt.setCurrency(java.util.Currency.getInstance(currency != null ? currency : "ZAR"));
+        } catch (Exception ignored) {}
+        return fmt.format(amount != null ? amount : BigDecimal.ZERO);
     }
 }
