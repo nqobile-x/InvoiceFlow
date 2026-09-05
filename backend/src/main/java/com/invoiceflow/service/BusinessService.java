@@ -60,6 +60,7 @@ public class BusinessService {
                 .bankBranchCode(req.bankBranchCode())
                 .country(req.country() != null ? req.country() : "ZA")
                 .currency(req.currency() != null ? req.currency() : "ZAR")
+                .contactPerson(req.contactPerson())
                 .build();
 
         return BusinessResponse.from(businessRepository.save(business));
@@ -93,6 +94,7 @@ public class BusinessService {
         if (req.watermarkEnabled() != null) business.setWatermarkEnabled(req.watermarkEnabled());
         business.setWatermarkText(req.watermarkText());
         if (req.watermarkOpacity() != null) business.setWatermarkOpacity(req.watermarkOpacity());
+        business.setContactPerson(req.contactPerson());
 
         return BusinessResponse.from(businessRepository.save(business));
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clientApi, invoiceApi, businessApi, type Client } from "@/lib/api";
@@ -60,8 +60,17 @@ export default function NewInvoicePage() {
   const { data: business } = useQuery({
     queryKey: ["business"],
     queryFn: () => businessApi.get().then((r) => r.data),
+    staleTime: 60_000,
   });
   const currencyMeta = getCurrencyMeta(business?.currency ?? "ZAR");
+
+  // Pre-fill contact person from business default once loaded
+  useEffect(() => {
+    if (business?.contactPerson && !contactPerson) {
+      setContactPerson(business.contactPerson);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [business?.contactPerson]);
 
   const { mutate: create, isPending } = useMutation({
     mutationFn: () => {

@@ -32,6 +32,7 @@ const schema = z.object({
   bankBranchCode: z.string().optional(),
   watermarkEnabled: z.boolean().default(false),
   watermarkText: z.string().max(20).optional(),
+  contactPerson: z.string().max(200).optional(),
 });
 type Form = z.infer<typeof schema>;
 
@@ -116,6 +117,7 @@ export default function SettingsPage() {
         bankBranchCode: business.bankBranchCode ?? "",
         watermarkEnabled: business.watermarkEnabled ?? false,
         watermarkText: business.watermarkText ?? "",
+        contactPerson: business.contactPerson ?? "",
       });
       if (business.logoUrl) setLogoPreview(business.logoUrl);
     }
@@ -259,6 +261,9 @@ export default function SettingsPage() {
           </Field>
           <Field label="VAT Number">
             <input {...register("vatNumber")} className={inputCls} style={IS} />
+          </Field>
+          <Field label="Contact Person" span2>
+            <input {...register("contactPerson")} placeholder="Primary contact name on invoices" className={inputCls} style={IS} />
           </Field>
         </Section>
 

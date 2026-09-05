@@ -56,14 +56,18 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await api.post<{ accessToken: string }>("/auth/refresh");
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) throw new Error("No refresh token");
+        const { data } = await api.post<{ accessToken: string; refreshToken: string }>("/auth/refresh", { refreshToken });
         setAccessToken(data.accessToken);
+        if (data.refreshToken) setRefreshToken(data.refreshToken);
         processQueue(null, data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearAccessToken();
+        clearRefreshToken();
         window.location.href = "/auth/login";
         return Promise.reject(refreshError);
       } finally {
@@ -75,7 +79,7 @@ api.interceptors.response.use(
   }
 );
 
-// Token helpers (in-memory for security, sessionStorage as fallback)
+// Token helpers
 let _accessToken: string | null = null;
 
 function getAccessToken(): string | null {
@@ -90,6 +94,18 @@ export function setAccessToken(token: string): void {
 export function clearAccessToken(): void {
   _accessToken = null;
   try { localStorage.removeItem("_ift"); } catch {}
+}
+
+export function setRefreshToken(token: string): void {
+  try { localStorage.setItem("_ifrt", token); } catch {}
+}
+
+function getRefreshToken(): string | null {
+  try { return localStorage.getItem("_ifrt"); } catch { return null; }
+}
+
+export function clearRefreshToken(): void {
+  try { localStorage.removeItem("_ifrt"); } catch {}
 }
 
 // === API functions ===
@@ -211,6 +227,7 @@ export interface Business {
   watermarkEnabled?: boolean;
   watermarkText?: string;
   watermarkOpacity?: number;
+  contactPerson?: string;
 }
 
 export type CreateBusinessRequest = Omit<Business, "id" | "logoUrl">;

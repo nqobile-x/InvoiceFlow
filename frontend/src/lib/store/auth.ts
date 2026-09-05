@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { setAccessToken, clearAccessToken } from "@/lib/api";
+import { setAccessToken, clearAccessToken, clearRefreshToken } from "@/lib/api";
 
 export interface AuthUser {
   id: string;
@@ -37,6 +37,7 @@ export const useAuthStore = create<AuthStore>()(
 
       logout() {
         clearAccessToken();
+        clearRefreshToken();
         set({ user: null, isAuthenticated: false });
       },
     }),
