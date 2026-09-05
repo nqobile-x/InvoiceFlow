@@ -79,17 +79,17 @@ api.interceptors.response.use(
 let _accessToken: string | null = null;
 
 function getAccessToken(): string | null {
-  return _accessToken ?? sessionStorage.getItem("_ift");
+  return _accessToken ?? localStorage.getItem("_ift");
 }
 
 export function setAccessToken(token: string): void {
   _accessToken = token;
-  sessionStorage.setItem("_ift", token);
+  try { localStorage.setItem("_ift", token); } catch {}
 }
 
 export function clearAccessToken(): void {
   _accessToken = null;
-  sessionStorage.removeItem("_ift");
+  try { localStorage.removeItem("_ift"); } catch {}
 }
 
 // === API functions ===
@@ -262,6 +262,9 @@ export interface Invoice {
   currency: string;
   notes?: string;
   terms?: string;
+  contactPerson?: string;
+  purchaseOrderNumber?: string;
+  tinNumber?: string;
   pdfUrl?: string;
   viewToken: string;
   sentAt?: string;
@@ -280,6 +283,9 @@ export interface CreateInvoiceRequest {
   lineItems: LineItem[];
   notes?: string;
   terms?: string;
+  contactPerson?: string;
+  purchaseOrderNumber?: string;
+  tinNumber?: string;
 }
 
 export type UpdateInvoiceRequest = Partial<CreateInvoiceRequest>;

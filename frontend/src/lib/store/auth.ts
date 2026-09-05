@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "invoiceflow-auth",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated }),
     }
   )

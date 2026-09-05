@@ -100,6 +100,15 @@ public class Invoice {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Column(name = "contact_person")
+    private String contactPerson;
+
+    @Column(name = "purchase_order_number")
+    private String purchaseOrderNumber;
+
+    @Column(name = "tin_number")
+    private String tinNumber;
+
     @Column(name = "payfast_payment_id")
     private String payfastPaymentId;
 
