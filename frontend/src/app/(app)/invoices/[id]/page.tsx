@@ -129,6 +129,13 @@ export default function InvoiceDetailPage() {
         {/* Actions */}
         <div className="flex gap-2 shrink-0">
           <button
+            onClick={() => router.push(`/invoices/${id}/edit`)}
+            className="px-3 py-2 text-xs font-medium border"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+          >
+            Edit
+          </button>
+          <button
             onClick={() => downloadPdf()}
             className="px-3 py-2 text-xs font-medium border"
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}

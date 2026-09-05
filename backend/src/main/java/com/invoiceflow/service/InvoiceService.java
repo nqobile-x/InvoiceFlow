@@ -118,10 +118,6 @@ public class InvoiceService {
         Invoice invoice = invoiceRepository.findByIdAndBusinessId(invoiceId, businessId)
                 .orElseThrow(() -> InvoiceFlowException.notFound("Invoice not found"));
 
-        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
-            throw InvoiceFlowException.badRequest("Only DRAFT invoices can be edited");
-        }
-
         Client client = clientRepository.findByIdAndBusinessId(req.clientId(), businessId)
                 .orElseThrow(() -> InvoiceFlowException.notFound("Client not found"));
 
