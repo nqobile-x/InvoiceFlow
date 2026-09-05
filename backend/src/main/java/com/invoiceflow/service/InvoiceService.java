@@ -102,6 +102,7 @@ public class InvoiceService {
                 .subtotal(subtotal)
                 .taxTotal(taxTotal)
                 .total(total)
+                .currency(business.getCurrency())
                 .notes(req.notes())
                 .terms(req.terms())
                 .contactPerson(req.contactPerson())

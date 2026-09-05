@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { clientApi, invoiceApi, type Client } from "@/lib/api";
-import { calculateInvoiceTotals, formatCurrency } from "@/lib/utils/currency";
+import { clientApi, invoiceApi, businessApi, type Client } from "@/lib/api";
+import { calculateInvoiceTotals, formatCurrency, getCurrencyMeta } from "@/lib/utils/currency";
 
 interface LineItemRow {
   description: string;
@@ -56,6 +56,12 @@ export default function NewInvoicePage() {
     queryKey: ["clients", "all"],
     queryFn: () => clientApi.list({ size: 200 }).then((r) => r.data.content),
   });
+
+  const { data: business } = useQuery({
+    queryKey: ["business"],
+    queryFn: () => businessApi.get().then((r) => r.data),
+  });
+  const currencyMeta = getCurrencyMeta(business?.currency ?? "ZAR");
 
   const { mutate: create, isPending } = useMutation({
     mutationFn: () => {
@@ -117,12 +123,20 @@ export default function NewInvoicePage() {
         <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
           Invoices
         </p>
-        <h1
-          className="text-3xl font-bold"
-          style={{ fontFamily: "'Playfair Display', serif", color: "var(--text-primary)" }}
-        >
-          New Invoice
-        </h1>
+        <div className="flex items-baseline gap-4">
+          <h1
+            className="text-3xl font-bold"
+            style={{ fontFamily: "'Playfair Display', serif", color: "var(--text-primary)" }}
+          >
+            New Invoice
+          </h1>
+          <span
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider"
+            style={{ background: "rgba(201,168,76,0.10)", color: "#C9A84C", letterSpacing: "0.06em" }}
+          >
+            {currencyMeta.flag} {currencyMeta.code}
+          </span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -297,13 +311,13 @@ export default function NewInvoicePage() {
             <div className="flex justify-between text-sm" style={{ color: "var(--text-secondary)" }}>
               <span>Subtotal</span>
               <span className="tabular" style={{ fontFamily: "IBM Plex Mono" }}>
-                {formatCurrency(totals.subtotal)}
+                {formatCurrency(totals.subtotal, currencyMeta.code)}
               </span>
             </div>
             <div className="flex justify-between text-sm" style={{ color: "var(--text-secondary)" }}>
               <span>VAT</span>
               <span className="tabular" style={{ fontFamily: "IBM Plex Mono" }}>
-                {formatCurrency(totals.taxTotal)}
+                {formatCurrency(totals.taxTotal, currencyMeta.code)}
               </span>
             </div>
             <div
@@ -312,7 +326,7 @@ export default function NewInvoicePage() {
             >
               <span>Total</span>
               <span className="tabular" style={{ fontFamily: "IBM Plex Mono" }}>
-                {formatCurrency(totals.total)}
+                {formatCurrency(totals.total, currencyMeta.code)}
               </span>
             </div>
           </div>
