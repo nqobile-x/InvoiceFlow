@@ -189,6 +189,24 @@ export default function InvoiceDetailPage() {
               <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Due Date</p>
               <p className="text-sm" style={{ color: "var(--text-primary)" }}>{inv.dueDate}</p>
             </div>
+            {inv.contactPerson && (
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Contact Person</p>
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{inv.contactPerson}</p>
+              </div>
+            )}
+            {inv.purchaseOrderNumber && (
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>PO Number</p>
+                <p className="text-sm tabular" style={{ fontFamily: "IBM Plex Mono", color: "var(--text-primary)" }}>{inv.purchaseOrderNumber}</p>
+              </div>
+            )}
+            {inv.tinNumber && (
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>TIN Number</p>
+                <p className="text-sm tabular" style={{ fontFamily: "IBM Plex Mono", color: "var(--text-primary)" }}>{inv.tinNumber}</p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             {inv.sentAt && (

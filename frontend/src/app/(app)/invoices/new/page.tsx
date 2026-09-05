@@ -46,6 +46,9 @@ export default function NewInvoicePage() {
   const [dueDate, setDueDate] = useState(in30Days());
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState("Payment due within 30 days of invoice date.");
+  const [contactPerson, setContactPerson] = useState("");
+  const [purchaseOrderNumber, setPurchaseOrderNumber] = useState(generatePoNumber);
+  const [tinNumber, setTinNumber] = useState("");
   const [lines, setLines] = useState<LineItemRow[]>([emptyLine()]);
   const [error, setError] = useState("");
 
@@ -71,6 +74,9 @@ export default function NewInvoicePage() {
         })),
         notes: notes || undefined,
         terms: terms || undefined,
+        contactPerson: contactPerson || undefined,
+        purchaseOrderNumber: purchaseOrderNumber || undefined,
+        tinNumber: tinNumber || undefined,
       });
     },
     onSuccess: (res) => {
@@ -160,6 +166,47 @@ export default function NewInvoicePage() {
                 onChange={(e) => setDueDate(e.target.value)}
                 className={inputCls}
                 style={{ background: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+              />
+            </Field>
+          </div>
+        </div>
+
+        {/* Section: Additional Details */}
+        <div
+          className="p-6 mb-4"
+          style={{ background: "var(--bg-surface)", boxShadow: "var(--shadow-card)" }}
+        >
+          <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--text-muted)" }}>
+            Additional Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Field label="Contact Person">
+              <input
+                type="text"
+                value={contactPerson}
+                onChange={(e) => setContactPerson(e.target.value)}
+                placeholder="e.g. John Smith"
+                className={inputCls}
+                style={{ background: "var(--bg-page)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+              />
+            </Field>
+            <Field label="Purchase Order Number">
+              <input
+                type="text"
+                value={purchaseOrderNumber}
+                onChange={(e) => setPurchaseOrderNumber(e.target.value)}
+                className={inputCls}
+                style={{ background: "var(--bg-page)", color: "var(--text-primary)", border: "1px solid var(--border)", fontFamily: "IBM Plex Mono" }}
+              />
+            </Field>
+            <Field label="TIN Number">
+              <input
+                type="text"
+                value={tinNumber}
+                onChange={(e) => setTinNumber(e.target.value)}
+                placeholder="Tax Identification Number"
+                className={inputCls}
+                style={{ background: "var(--bg-page)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
               />
             </Field>
           </div>
@@ -342,4 +389,10 @@ function in30Days() {
   const d = new Date();
   d.setDate(d.getDate() + 30);
   return d.toISOString().split("T")[0];
+}
+
+function generatePoNumber() {
+  const year = new Date().getFullYear();
+  const seq = Math.floor(Math.random() * 90000) + 10000;
+  return `PO-${year}-${seq}`;
 }

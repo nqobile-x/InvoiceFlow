@@ -104,6 +104,9 @@ public class InvoiceService {
                 .total(total)
                 .notes(req.notes())
                 .terms(req.terms())
+                .contactPerson(req.contactPerson())
+                .purchaseOrderNumber(req.purchaseOrderNumber())
+                .tinNumber(req.tinNumber())
                 .build();
 
         return InvoiceResponse.from(invoiceRepository.save(invoice));
@@ -138,6 +141,9 @@ public class InvoiceService {
         invoice.setTotal(subtotal.add(taxTotal));
         invoice.setNotes(req.notes());
         invoice.setTerms(req.terms());
+        invoice.setContactPerson(req.contactPerson());
+        invoice.setPurchaseOrderNumber(req.purchaseOrderNumber());
+        invoice.setTinNumber(req.tinNumber());
 
         return InvoiceResponse.from(invoiceRepository.save(invoice));
     }

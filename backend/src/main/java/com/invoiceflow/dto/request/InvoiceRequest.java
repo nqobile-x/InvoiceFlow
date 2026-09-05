@@ -14,5 +14,8 @@ public record InvoiceRequest(
     @NotNull LocalDate dueDate,
     @NotNull @NotEmpty @Valid List<LineItemRequest> lineItems,
     String notes,
-    String terms
+    String terms,
+    String contactPerson,
+    String purchaseOrderNumber,
+    String tinNumber
 ) {}
