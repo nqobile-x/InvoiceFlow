@@ -26,5 +26,6 @@ public record BusinessRequest(
     String currency,
     Boolean watermarkEnabled,
     @Size(max = 50) String watermarkText,
-    Double watermarkOpacity
+    Double watermarkOpacity,
+    @Size(max = 200) String contactPerson
 ) {}

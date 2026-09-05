@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/lib/store/auth";
+import { setRefreshToken } from "@/lib/api";
 
 const schema = z
   .object({
@@ -48,6 +49,7 @@ export default function RegisterPage() {
         password: data.password,
       });
       const d = res.data;
+      setRefreshToken(d.refreshToken);
       login(
         {
           id: d.userId,

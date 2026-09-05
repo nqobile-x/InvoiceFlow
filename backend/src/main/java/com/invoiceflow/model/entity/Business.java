@@ -89,6 +89,9 @@ public class Business {
     @Builder.Default
     private String currency = "ZAR";
 
+    @Column(name = "contact_person")
+    private String contactPerson;
+
     @Column(name = "watermark_enabled")
     @Builder.Default
     private boolean watermarkEnabled = false;

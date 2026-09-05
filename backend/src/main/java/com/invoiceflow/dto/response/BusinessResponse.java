@@ -29,7 +29,8 @@ public record BusinessResponse(
     String currency,
     boolean watermarkEnabled,
     String watermarkText,
-    Double watermarkOpacity
+    Double watermarkOpacity,
+    String contactPerson
 ) {
     public static BusinessResponse from(Business b) {
         return new BusinessResponse(
@@ -39,7 +40,8 @@ public record BusinessResponse(
             b.getLogoUrl(), b.getPrimaryColor(), b.getSecondaryColor(),
             b.getInvoicePrefix(), b.getPaymentTermsDays(),
             b.getBankName(), b.getBankAccountNumber(), b.getBankBranchCode(),
-            b.getCurrency(), b.isWatermarkEnabled(), b.getWatermarkText(), b.getWatermarkOpacity()
+            b.getCurrency(), b.isWatermarkEnabled(), b.getWatermarkText(), b.getWatermarkOpacity(),
+            b.getContactPerson()
         );
     }
 }
