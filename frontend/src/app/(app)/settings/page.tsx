@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
+import { CurrencyPicker } from "@/components/ui/CurrencyPicker";
 
 const schema = z.object({
   name: z.string().min(1, "Business name is required"),
@@ -88,6 +89,7 @@ export default function SettingsPage() {
   } = useForm<Form>({ resolver: zodResolver(schema) });
 
   const primaryColor = watch("primaryColor") ?? "#0A1628";
+  const currency = watch("currency") ?? "ZAR";
   const watermarkEnabled = watch("watermarkEnabled");
 
   useEffect(() => {
@@ -288,13 +290,11 @@ export default function SettingsPage() {
           <Field label="Payment Terms (days)">
             <input {...register("paymentTermsDays")} type="number" min={1} className={inputCls} style={IS} />
           </Field>
-          <Field label="Currency">
-            <select {...register("currency")} className={inputCls} style={{ ...IS, appearance: "auto" }}>
-              <option value="ZAR">ZAR — South African Rand</option>
-              <option value="USD">USD — US Dollar</option>
-              <option value="EUR">EUR — Euro</option>
-              <option value="GBP">GBP — British Pound</option>
-            </select>
+          <Field label="Currency" span2>
+            <CurrencyPicker
+              value={currency}
+              onChange={(code) => setValue("currency", code, { shouldDirty: true })}
+            />
           </Field>
           <Field label="Invoice Brand Colour">
             <div className="flex gap-2 items-center">
