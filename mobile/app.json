@@ -3,14 +3,10 @@
     "name": "InvoiceFlow",
     "slug": "invoiceflow",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0A1628"
-    },
+    "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -20,8 +16,11 @@
     },
     "android": {
       "package": "co.za.invoiceflow",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
         "backgroundColor": "#0A1628"
       },
       "permissions": []
@@ -30,11 +29,23 @@
       "expo-router",
       "expo-secure-store",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F8F6F1",
+          "image": "./assets/splash-icon-light.png",
+          "imageWidth": 180,
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#0A1628"
+          }
+        }
+      ]
     ],
     "scheme": "invoiceflow",
     "extra": {
-      "apiUrl": "http://192.168.0.249:8080/api/v1",
+      "apiUrl": "https://invoiceflow-api-dwy4.onrender.com/api/v1",
       "router": {},
       "eas": {
         "projectId": "9793529e-e778-41be-8580-ced37e5ee3e2"

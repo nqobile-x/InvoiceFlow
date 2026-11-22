@@ -77,6 +77,9 @@ export interface Invoice {
   currency: string;
   notes?: string;
   terms?: string;
+  contactPerson?: string;
+  purchaseOrderNumber?: string;
+  tinNumber?: string;
   pdfUrl?: string;
   viewToken: string;
   sentAt?: string;
@@ -143,8 +146,9 @@ export const invoiceApi = {
     terms?: string;
   }) => api.post<Invoice>("/invoices", data),
   send: (id: string) => api.post<Invoice>(`/invoices/${id}/send`),
-  markPaid: (id: string, data: { amount: number; paymentMethod: string; reference: string; paidAt: string }) =>
-    api.post<Invoice>(`/invoices/${id}/mark-paid`, data),
+  markPaid: (id: string, data?: { amount: number; paymentMethod: string; reference: string; paidAt: string }) =>
+    api.post<Invoice>(`/invoices/${id}/mark-paid`, data ?? {}),
+  delete: (id: string) => api.delete(`/invoices/${id}`),
   downloadPdf: (id: string) =>
     api.get(`/invoices/${id}/pdf`, { responseType: "arraybuffer" }),
 };
