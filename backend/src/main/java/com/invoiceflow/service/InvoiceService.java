@@ -56,7 +56,7 @@ public class InvoiceService {
                 .orElseThrow(() -> InvoiceFlowException.notFound("Invoice not found"));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public InvoiceResponse getPublic(UUID viewToken) {
         Invoice invoice = invoiceRepository.findByViewToken(viewToken)
                 .orElseThrow(() -> InvoiceFlowException.notFound("Invoice not found"));

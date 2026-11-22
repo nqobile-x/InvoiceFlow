@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -40,7 +41,24 @@ public class EmailService {
     private String frontendUrl;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-    private static final NumberFormat ZAR = NumberFormat.getCurrencyInstance(new Locale("en", "ZA"));
+
+    private static final Map<String, Locale> CURRENCY_LOCALES = Map.ofEntries(
+        Map.entry("ZAR", new Locale("en", "ZA")),
+        Map.entry("BWP", new Locale("en", "BW")),
+        Map.entry("NAD", new Locale("en", "NA")),
+        Map.entry("ZMW", new Locale("en", "ZM")),
+        Map.entry("KES", new Locale("en", "KE")),
+        Map.entry("USD", Locale.US),
+        Map.entry("EUR", Locale.GERMANY),
+        Map.entry("GBP", Locale.UK)
+    );
+
+    private String formatAmount(BigDecimal amount, String currency) {
+        Locale locale = CURRENCY_LOCALES.getOrDefault(currency != null ? currency : "ZAR", new Locale("en", "ZA"));
+        NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
+        try { fmt.setCurrency(java.util.Currency.getInstance(currency != null ? currency : "ZAR")); } catch (Exception ignored) {}
+        return fmt.format(amount != null ? amount : BigDecimal.ZERO);
+    }
 
     @Async
     public void sendInvoice(Invoice invoice) {
@@ -53,7 +71,7 @@ public class EmailService {
             ctx.setVariable("invoiceNumber", invoice.getInvoiceNumber());
             ctx.setVariable("clientName", client.getCompanyName() != null ? client.getCompanyName() : client.getName());
             ctx.setVariable("businessName", business.getName());
-            ctx.setVariable("total", ZAR.format(invoice.getTotal()));
+            ctx.setVariable("total", formatAmount(invoice.getTotal(), invoice.getCurrency()));
             ctx.setVariable("dueDate", invoice.getDueDate().format(DATE_FMT));
             ctx.setVariable("viewUrl", frontendUrl + "/invoice/" + invoice.getViewToken());
             ctx.setVariable("primaryColor", business.getPrimaryColor() != null ? business.getPrimaryColor() : "#0A1628");
@@ -76,13 +94,11 @@ public class EmailService {
             Business business = invoice.getBusiness();
             Client client = invoice.getClient();
 
-            BigDecimal outstanding = invoice.getTotal();
-
             Context ctx = new Context();
             ctx.setVariable("invoiceNumber", invoice.getInvoiceNumber());
             ctx.setVariable("clientName", client.getCompanyName() != null ? client.getCompanyName() : client.getName());
             ctx.setVariable("businessName", business.getName());
-            ctx.setVariable("total", ZAR.format(outstanding));
+            ctx.setVariable("total", formatAmount(invoice.getTotal(), invoice.getCurrency()));
             ctx.setVariable("dueDate", invoice.getDueDate().format(DATE_FMT));
             ctx.setVariable("viewUrl", frontendUrl + "/invoice/" + invoice.getViewToken());
             ctx.setVariable("primaryColor", business.getPrimaryColor() != null ? business.getPrimaryColor() : "#0A1628");

@@ -70,6 +70,11 @@ public class PaymentService {
 
         log.info("PayFast ITN received: paymentId={}, status={}, ip={}", mPaymentId, paymentStatus, requestIp);
 
+        if (mPaymentId == null || mPaymentId.isBlank()) {
+            log.warn("PayFast ITN missing m_payment_id, ignoring");
+            return;
+        }
+
         Invoice invoice = invoiceRepository.findByPayfastPaymentId(mPaymentId)
                 .orElseGet(() -> {
                     log.warn("PayFast ITN: no invoice found for paymentId={}", mPaymentId);
